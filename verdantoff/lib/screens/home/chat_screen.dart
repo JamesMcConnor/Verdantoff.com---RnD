@@ -1,1 +1,1 @@
-// 聊天页面，显示聊天消息列表和发送消息输入框。
+// The chat page displays the chat message list and the send message input box.

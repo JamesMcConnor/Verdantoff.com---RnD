@@ -1,4 +1,4 @@
-// 用户数据模型，映射用户数据。
+// User data model, mapping user data.
 class UserModel {
   final String id;
   final String name;

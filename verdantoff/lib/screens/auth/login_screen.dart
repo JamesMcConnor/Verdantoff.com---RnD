@@ -60,25 +60,25 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: _login,
               child: Text('Login'),
             ),
-            SizedBox(height: 16.0), // 增加间距
+            SizedBox(height: 16.0), // Increase spacing
             ElevatedButton.icon(
               onPressed: _loginWithGoogle,
               icon: Icon(Icons.login),
               label: Text('Login with Google'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // 按钮颜色
-                foregroundColor: Colors.white, // 字体颜色
+                backgroundColor: Colors.red, // Button Color
+                foregroundColor: Colors.white, // Font Color
               ),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/auth/register'); // 跳转到注册页面
+                Navigator.pushNamed(context, '/auth/register'); // Jump to the registration page
               },
               child: Text('Don’t have an account? Register here!'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/auth/forgot-password'); // 跳转到忘记密码页面
+                Navigator.pushNamed(context, '/auth/forgot-password'); // Go to the Forgot Password page
               },
               child: Text('Forgot Password?'),
             ),

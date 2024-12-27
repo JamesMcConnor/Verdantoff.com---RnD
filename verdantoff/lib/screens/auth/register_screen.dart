@@ -29,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration Successful! Welcome, ${user.email}')),
       );
-      Navigator.pop(context); // 返回到登录页面
+      Navigator.pop(context); // Return to the login page
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration Failed. Please try again.')),

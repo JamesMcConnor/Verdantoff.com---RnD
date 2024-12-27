@@ -1,4 +1,4 @@
-// 应用主页面，显示导航栏和主要功能模块入口。
+// The main page of the application displays the navigation bar and the entrance to the main functional modules.
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: () => _logout(context), // 将 context 作为参数传递
+            onPressed: () => _logout(context), // Passing context as a parameter
           ),
         ],
       ),

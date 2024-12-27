@@ -1,1 +1,1 @@
-// 通知卡片组件，展示单个通知内容。
+// Notification card component, which displays a single notification content.

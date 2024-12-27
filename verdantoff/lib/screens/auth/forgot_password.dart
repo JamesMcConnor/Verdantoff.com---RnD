@@ -8,7 +8,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   Future<void> _resetPassword(BuildContext context) async {
     final email = _emailController.text.trim();
 
-    // 邮箱格式验证
+    // Email format verification
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter your email address')),
@@ -22,13 +22,13 @@ class ForgotPasswordScreen extends StatelessWidget {
       return;
     }
 
-    // 尝试发送密码重置邮件
+    // Try sending a password reset email
     try {
       await _auth.sendPasswordResetEmail(email: email);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Password reset email sent! Check your inbox.')),
       );
-      Navigator.pop(context); // 返回登录页面
+      Navigator.pop(context); // Return to login page
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to send reset email: $e')),
@@ -36,9 +36,9 @@ class ForgotPasswordScreen extends StatelessWidget {
     }
   }
 
-  // 检查邮箱格式的方法
+  // check the mailbox format
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+'); // 简单的邮箱正则表达式
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+'); // Simple email regular expression
     return emailRegex.hasMatch(email);
   }
 
@@ -62,7 +62,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 labelText: 'Email',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.emailAddress, // 显示邮箱键盘
+              keyboardType: TextInputType.emailAddress, // Show Mailbox Keyboard
             ),
             SizedBox(height: 20),
             Center(

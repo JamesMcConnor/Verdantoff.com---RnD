@@ -1,1 +1,1 @@
-// 好友列表页面，展示好友列表及添加好友功能。
+// The friend list page displays the friend list and the function of adding friends.

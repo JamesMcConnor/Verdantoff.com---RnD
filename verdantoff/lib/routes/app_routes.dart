@@ -1,5 +1,5 @@
-// 应用路由表，集中管理所有页面路由地址。
-// 每个页面可以通过命名路由方式进行导航。
+// Apply the routing table to centrally manage all page routing addresses.
+// Each page can be navigated by named routing.
 import 'package:flutter/material.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
@@ -17,9 +17,9 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-// 路由注册
+// Route Registration
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => LoginScreen(),
-  '/register': (context) => RegisterScreen(), // 注册页面
+  '/register': (context) => RegisterScreen(), // Registration Page
   '/home': (context) => HomeScreen(),
 };

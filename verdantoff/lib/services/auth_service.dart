@@ -5,7 +5,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // Google 登录方法
+  // Google Sign-in Method
   Future<User?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -28,7 +28,7 @@ class AuthService {
     }
   }
 
-  // 用户注册方法
+  // User Registration Method
   Future<User?> register(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
@@ -42,7 +42,7 @@ class AuthService {
     }
   }
 
-  // 用户注销方法
+  // User logout method
   Future<void> logout() async {
     try {
       await _auth.signOut();
