@@ -21,5 +21,4 @@ class LoginScreen extends StatelessWidget {
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => LoginScreen(),
   '/register': (context) => RegisterScreen(), // Registration Page
-  '/home': (context) => HomeScreen(),
 };
