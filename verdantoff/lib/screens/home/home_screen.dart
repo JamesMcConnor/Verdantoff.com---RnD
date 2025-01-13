@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (userName != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Welcome, $userName!'),
+            content: Text('Hey, $userName!'),
             duration: const Duration(seconds: 3), // 显示时间为 3 秒
           ),
         );
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? 'Contacts'
                 : _currentIndex == 2
                 ? 'Discover'
-                : 'Welcome, $userName',
+                : 'Me',
             onNotificationTap: () {
               Navigator.pushNamed(context, '/notifications'); // 跳转到通知页面
             },

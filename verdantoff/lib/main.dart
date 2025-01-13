@@ -1,15 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'screens/auth/login_screen.dart'; // login
-import 'screens/auth/register_screen.dart'; // register
-import 'screens/home/home_screen.dart'; // main page
-import 'screens/auth/forgot_password.dart';
-import 'screens/home/notifications_screen.dart';
+import 'routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
+  await Firebase.initializeApp();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+  };
+
   runApp(MyApp());
 }
 
@@ -20,20 +20,29 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Firebase Auth',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.blue,
+          textTheme: ButtonTextTheme.primary,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue),
+          ),
+        ),
       ),
       initialRoute: '/auth/login',
-      routes: {
-        '/auth/login': (context) => LoginScreen(),
-        '/auth/register': (context) => RegisterScreen(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/home') {
-          final args = settings.arguments as String; // 接收传递的 userName
-          return MaterialPageRoute(
-            builder: (context) => HomeScreen(userName: args),
-          );
-        }
-        return null;
+      routes: staticRoutes,
+      onGenerateRoute: generateRoute,
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(title: Text('Page Not Found')),
+            body: Center(
+              child: Text('The page ${settings.name} does not exist.'),
+            ),
+          ),
+        );
       },
     );
   }
