@@ -13,7 +13,7 @@ final Map<String, WidgetBuilder> staticRoutes = {
   '/auth/login': (context) => LoginScreen(),
   '/auth/register': (context) => RegisterScreen(),
   '/auth/forgot-password': (context) => ForgotPasswordScreen(),
-  //'/notifications': (context) => NotificationsScreen(),
+  '/notifications': (context) => NotificationScreen(),
   '/user-search': (context) => UserSearchScreen(), // 用户搜索页面
 };
 
