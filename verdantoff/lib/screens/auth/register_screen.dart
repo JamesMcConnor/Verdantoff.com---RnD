@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // 用于 Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
-import '../home/home_screen.dart'; // 导入 HomeScreen
+import '../home/Navigation_management/home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -11,12 +11,12 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController _userNameController = TextEditingController(); // 用户名控制器
+  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final AuthService _authService = AuthService();
-  final _formKey = GlobalKey<FormState>(); // 用于表单验证
+  final _formKey = GlobalKey<FormState>();
 
   void _register() async {
     if (_formKey.currentState!.validate()) {
@@ -33,15 +33,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           SnackBar(content: Text('Welcome, $userName')),
         );
 
-        // 注册成功后直接跳转到主页面，并传递用户名
+        // ✅ After successful registration, jump to `HomeScreen` (no need to pass userName）
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(userName: userName), // 直接传递 userName
+            builder: (context) => const HomeScreen(), // ✅ `HomeScreen` no need `userName`
           ),
         );
-
-
       } else {
         print('Registration failed. Check logs for details.');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -50,9 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 用户名输入框
+                // Username input box
                 TextFormField(
                   controller: _userNameController,
                   decoration: const InputDecoration(labelText: 'User Name'),
@@ -79,7 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // 邮箱输入框
+                // Email input box
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
@@ -96,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // 密码输入框
+                // Password input box
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(labelText: 'Password'),
@@ -113,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // 确认密码输入框
+                // Confirm password input box
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: const InputDecoration(labelText: 'Confirm Password'),
@@ -130,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 注册按钮
+                // Register Button
                 ElevatedButton(
                   onPressed: _register,
                   child: const Text('Register'),

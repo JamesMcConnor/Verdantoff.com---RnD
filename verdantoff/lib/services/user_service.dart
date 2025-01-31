@@ -5,18 +5,18 @@ class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// 确保用户已登录，否则抛出异常
+  /// Make sure the user is logged in, otherwise throw an exception
   void _checkUserLoggedIn() {
     if (_auth.currentUser == null) {
       throw Exception('User not logged in');
     }
   }
 
-  /// 按邮箱精确搜索用户
+  /// Search for users by email address
   ///
-  /// 返回值包含用户数据和 UID。
+  /// The return value contains the user data and the UID.
   Future<Map<String, dynamic>?> searchByEmail(String email) async {
-    _checkUserLoggedIn(); // 确保用户已登录
+    _checkUserLoggedIn(); // Make sure the user is logged in
 
     try {
       QuerySnapshot snapshot = await _firestore
@@ -27,22 +27,22 @@ class UserService {
       if (snapshot.docs.isNotEmpty) {
         var doc = snapshot.docs.first;
         return {
-          'uid': doc.id, // 添加 UID
+          'uid': doc.id, // Add UID
           ...doc.data() as Map<String, dynamic>
         };
       }
-      return null; // 未找到用户
+      return null; // not find user
     } catch (e) {
       print('Search by email failed: $e');
-      rethrow; // 抛出异常供调用方捕获
+      rethrow; // Throw an exception for the caller to catch
     }
   }
 
-  /// 按用户名精确搜索用户
+  /// Search for users by username
   ///
-  /// 返回值为用户数据列表，每个用户包含 UID。
+  /// The return value is a user data list, each user contains the UID.
   Future<List<Map<String, dynamic>>> searchByUserName(String userName) async {
-    _checkUserLoggedIn(); // 确保用户已登录
+    _checkUserLoggedIn(); // Make sure the user is logged in
 
     try {
       QuerySnapshot snapshot = await _firestore
@@ -52,13 +52,13 @@ class UserService {
 
       return snapshot.docs.map((doc) {
         return {
-          'uid': doc.id, // 添加 UID
+          'uid': doc.id, // add UID
           ...doc.data() as Map<String, dynamic>
         };
       }).toList();
     } catch (e) {
       print('Search by username failed: $e');
-      rethrow; // 抛出异常供调用方捕获
+      rethrow; // Throw an exception for the caller to catch
     }
   }
 }

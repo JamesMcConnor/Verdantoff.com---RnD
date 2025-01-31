@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:verdantoff/services/auth_service.dart';
-import '../home/home_screen.dart'; // 引入 HomeScreen
+import '../home/Navigation_management/home_screen.dart'; // 引入 HomeScreen
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -20,21 +20,15 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      final uid = userCredential.user?.uid;
-      if (uid != null) {
-        String? userName = await AuthService().fetchUserName(uid);
-        print('Logged in: ${userCredential.user?.email} with userName: $userName');
+      print('Logged in: ${userCredential.user?.email}');
 
-        // 登录成功后跳转到主页面并传递用户名
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(userName: userName),
-          ),
-        );
-      } else {
-        throw Exception('User ID is null');
-      }
+      // After successful login, jump to `HomeScreen` and no longer pass `userName'
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(),
+        ),
+      );
     } catch (e) {
       print('Login failed: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,10 +42,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = await AuthService().signInWithGoogle();
       if (user != null) {
         print('Google Login successful: ${user.email}');
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(userName: user.displayName ?? 'Google User'),
+            builder: (context) => HomeScreen(),
           ),
         );
       } else {
@@ -66,45 +61,75 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Add Verdantoff title
+            Text(
+              'Verdantoff',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 24.0), // The spacing between the title and the input box
+
+            // Email 输入框
             TextField(
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
+
+            SizedBox(height: 16.0), // Spacing between Email and Password
+
+            // Password 输入框
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
+
+            SizedBox(height: 24.0), // Spacing between input box and button
+
+            //Login Button
             ElevatedButton(
               onPressed: _login,
               child: Text('Login'),
             ),
-            SizedBox(height: 16.0), // 增加间距
+
+            SizedBox(height: 16.0), // spacing
+
+            // Google 登录按钮
             ElevatedButton.icon(
               onPressed: _loginWithGoogle,
               icon: Icon(Icons.login),
               label: Text('Login with Google'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // 按钮颜色
-                foregroundColor: Colors.white, // 字体颜色
+                backgroundColor: Colors.red, // Button Color
+                foregroundColor: Colors.white, // Font Color
               ),
             ),
+
+            SizedBox(height: 16.0),
+
+            // Register Button
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/auth/register'); // 跳转到注册页面
+                Navigator.pushNamed(context, '/auth/register');
               },
               child: Text('Don’t have an account? Register here!'),
             ),
+
+            // Forgot password button
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/auth/forgot-password'); // 跳转到忘记密码页面
+                Navigator.pushNamed(context, '/auth/forgot-password');
               },
               child: Text('Forgot Password?'),
             ),

@@ -49,6 +49,7 @@ dependencies:
   image_cropper: ^8.0.1
   cached_network_image: ^3.2.3
   flutter_cache_manager: ^3.3.0
+  shared_preferences: ^2.4.0
 
 dev_dependencies:
   flutter_test:

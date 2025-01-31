@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/friend_requests/friend_request_sender.dart';
+
 
 class SendFriendRequestScreen extends StatefulWidget {
-  final Map<String, dynamic> user; // 目标用户信息
+  final Map<String, dynamic> user; // Target user information
 
   const SendFriendRequestScreen({required this.user});
 
@@ -15,18 +17,17 @@ class SendFriendRequestScreen extends StatefulWidget {
 class _SendFriendRequestScreenState extends State<SendFriendRequestScreen> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _aliasController = TextEditingController();
-  bool _isLoading = false; // 加载状态
+  bool _isLoading = false; // Loading Status
   String? _currentUserName;
 
   @override
   void initState() {
     super.initState();
-    print('widget.user: ${widget.user}');
+    _aliasController.text = widget.user['userName'] ?? ''; // Default Aliases
     _fetchCurrentUserName();
-    _aliasController.text = widget.user['userName'] ?? ''; // 默认别名
   }
 
-  /// 获取当前登录用户的用户名
+  /// Get the username of the currently logged in user
   Future<void> _fetchCurrentUserName() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -42,34 +43,16 @@ class _SendFriendRequestScreenState extends State<SendFriendRequestScreen> {
         });
       }
     } catch (e) {
-      print('Error fetching current user name: $e');
+      print('[ERROR] Failed to fetch current user name: $e');
       _messageController.text = 'Hi, I am User';
     }
   }
 
-  /// 检查是否已有未处理的好友请求
-  Future<bool> _checkExistingRequest(String senderId, String receiverId) async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('friend_requests')
-          .where('senderId', isEqualTo: senderId)
-          .where('receiverId', isEqualTo: receiverId)
-          .where('status', isEqualTo: 'pending')
-          .get();
-
-      return querySnapshot.docs.isNotEmpty;
-    } catch (e) {
-      print('Error checking existing request: $e');
-      return false;
-    }
-  }
-
-  /// 发送好友请求逻辑
+  /// Send a friend request
   Future<void> _sendRequest() async {
-    if (_isLoading) return; // 防止重复点击
+    if (_isLoading) return;
 
     final currentUser = FirebaseAuth.instance.currentUser;
-
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('You must be logged in to send friend requests.')),
@@ -77,20 +60,12 @@ class _SendFriendRequestScreenState extends State<SendFriendRequestScreen> {
       return;
     }
 
-    final currentUserId = currentUser.uid;
+    final senderId = currentUser.uid;
     final receiverId = widget.user['uid'];
-
-    if (receiverId == null || receiverId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('The target user is invalid.')),
-      );
-      return;
-    }
-
     final message = _messageController.text.trim();
     final alias = _aliasController.text.trim();
 
-    if (message.isEmpty || alias.isEmpty) {
+    if (receiverId.isEmpty || message.isEmpty || alias.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Message and alias cannot be empty.')),
       );
@@ -102,40 +77,14 @@ class _SendFriendRequestScreenState extends State<SendFriendRequestScreen> {
     });
 
     try {
-      // 检查是否已有未处理的好友请求
-      if (await _checkExistingRequest(currentUserId, receiverId)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('A friend request is already pending.')),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
+      final friendRequestSender = FriendRequestSender();
+      await friendRequestSender.sendFriendRequest(
+        senderId: senderId,
+        receiverId: receiverId,
+        message: message,
+        alias: alias,
+      );
 
-      // 创建好友请求记录
-      final friendRequestRef = await FirebaseFirestore.instance
-          .collection('friend_requests')
-          .add({
-        'senderId': currentUserId,
-        'receiverId': receiverId,
-        'message': message,
-        'alias': alias,
-        'status': 'pending',
-        'expiresAt': DateTime.now().add(Duration(days: 7)).toUtc(),
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      // 创建通知记录
-      await FirebaseFirestore.instance.collection('notifications').add({
-        'receiverId': receiverId,
-        'type': 'friend_request',
-        'relatedId': friendRequestRef.id,
-        'message': 'You have a new friend request from $_currentUserName',
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      // 显示成功提示并返回上一页面
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -144,8 +93,8 @@ class _SendFriendRequestScreenState extends State<SendFriendRequestScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // 关闭对话框
-                Navigator.pop(context); // 返回上一页面
+                Navigator.pop(context); // Close dialog box
+                Navigator.pop(context); // Return to the previous page
               },
               child: Text('OK'),
             ),
@@ -154,7 +103,7 @@ class _SendFriendRequestScreenState extends State<SendFriendRequestScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send friend request: ${e.toString()}')),
+        SnackBar(content: Text(e.toString())),
       );
     } finally {
       setState(() {

@@ -47,41 +47,52 @@ class AuthService {
   /// If the user doesn't exist in Firestore, it initializes their information.
   Future<User?> signInWithGoogle() async {
     try {
+      // Trigger Google Sign-In
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return null;
+      if (googleUser == null) return null; // User canceled the login
 
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+      // Retrieve Google Authentication details
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
+      // Create OAuth Credential
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential =
-      await _auth.signInWithCredential(credential);
+      // Sign in to Firebase
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final user = userCredential.user;
 
       if (user != null) {
-        // Check if user data exists in Firestore
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        // Check or Initialize Firestore user data
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
         if (!userDoc.exists) {
-          // Initialize user data
-          await _firestore.collection('users').doc(user.uid).set({
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
             'userName': user.displayName ?? 'Google User',
-            'email': user.email,
-            'fullName': user.displayName,
-            'avatar': googleUser.photoUrl ?? null,
+            'email': user.email ?? 'No Email',
+            'fullName': user.displayName ?? 'No Name',
+            'avatar': googleUser.photoUrl ?? '',
             'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+            'updatedBy': user.uid,
+          });
+        } else {
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+            'updatedAt': FieldValue.serverTimestamp(),
+            'updatedBy': user.uid,
           });
         }
       }
+
       return user;
     } catch (e) {
       print('Google Sign-In failed: $e');
       throw Exception('Google sign-in failed: ${e.toString()}');
     }
   }
+
+
 
   /// **Log out the current user**
   ///
