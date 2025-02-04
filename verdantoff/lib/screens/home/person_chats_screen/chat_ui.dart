@@ -19,22 +19,22 @@ class ChatUI extends StatelessWidget {
           onBack: () => Navigator.pop(context),
         ),
 
-          ValueListenableBuilder<List<P2PMessage>>(
-            valueListenable: chatStateManager.messages,
-            builder: (context, messages, _) {
-              return ChatArea(
-                messages: messages,
-                friendName: chatStateManager.friendName,
-                chatId: chatStateManager.chatId,
-                onNewMessage: (P2PMessage newMessage) {
-                  chatStateManager.messages.value = [
-                    ...chatStateManager.messages.value,
-                    newMessage,
-                  ];
-                },
-              );
-            },
-          ),
+        ValueListenableBuilder<List<P2PMessage>>(
+          valueListenable: chatStateManager.messages,
+          builder: (context, messages, _) {
+            return ChatArea(
+              messages: messages,
+              friendName: chatStateManager.friendName,
+              chatId: chatStateManager.chatId,
+              onNewMessage: (P2PMessage newMessage) {
+                chatStateManager.messages.value = [
+                  ...chatStateManager.messages.value,
+                  newMessage,
+                ];
+              },
+            );
+          },
+        ),
 
         BottomInput(
           controller: chatStateManager.messageController,

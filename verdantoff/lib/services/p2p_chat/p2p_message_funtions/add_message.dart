@@ -19,6 +19,7 @@ Future<P2PMessage> addMessageFunction(String chatId, P2PMessage message) async {
         'senderId': message.senderId,
         'type': message.type,
         'timestamp': message.timestamp,
+        'isRecalled': message.isRecalled,
       },
       'updatedAt': FieldValue.serverTimestamp(),
       'unreadCounts.${message.senderId}': 0,

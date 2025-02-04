@@ -77,10 +77,12 @@ Route<dynamic>? generateRoute(RouteSettings settings) {
     case '/person_chats_screen':
       if (settings.arguments is Map<String, dynamic>) {
         final chatArgs = settings.arguments as Map<String, dynamic>;
-        if (chatArgs.containsKey('friendName') &&
+        if (chatArgs.containsKey('chatId') &&
+            chatArgs.containsKey('friendName') &&
             chatArgs.containsKey('friendId')) {
           return MaterialPageRoute(
             builder: (context) => PersonChatsScreen(
+              chatId: chatArgs['chatId'] as String,
               friendName: chatArgs['friendName'] as String,
               friendId: chatArgs['friendId'] as String,
             ),

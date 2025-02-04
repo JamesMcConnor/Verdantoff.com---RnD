@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import '../Chat_list_screen/chat_screen.dart';
+import '../Chat_list_screen/chat_list_screen.dart';
 import '../Contacts/friend_list_screen.dart';
 import '../Calendar/discover_screen.dart';
 import '../Me_screen/me_screen.dart';
@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// List of pages corresponding to the bottom navigation bar items.
   final List<Widget> _pages = [
-    ChatScreen(), // Chat list screen
+    ChatListScreen(), // Chat list screen
     FriendListScreen(), // Contact list screen
     DiscoverScreen(), // Calendar or discovery section
     MeScreen(), // User profile section

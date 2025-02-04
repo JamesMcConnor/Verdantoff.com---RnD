@@ -3,11 +3,13 @@ import 'chat_ui.dart';
 import 'Chat_logic/chat_state_manager.dart';
 
 class PersonChatsScreen extends StatefulWidget {
+  final String chatId;
   final String friendName;
   final String friendId;
 
   const PersonChatsScreen({
     Key? key,
+    required this.chatId,
     required this.friendName,
     required this.friendId,
   }) : super(key: key);
@@ -22,7 +24,11 @@ class _PersonChatsScreenState extends State<PersonChatsScreen> {
   @override
   void initState() {
     super.initState();
-    _chatStateManager = ChatStateManager(friendName: widget.friendName, friendId: widget.friendId);
+    _chatStateManager = ChatStateManager(
+      chatId: widget.chatId,
+      friendName: widget.friendName,
+      friendId: widget.friendId,
+    );
     _chatStateManager.initializeChat();
   }
 

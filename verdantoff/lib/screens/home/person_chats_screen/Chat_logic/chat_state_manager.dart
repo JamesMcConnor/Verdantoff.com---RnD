@@ -7,51 +7,42 @@ import '../../../../services/models/p2p_chat/p2p_message_model.dart';
 import '../../../../services/p2p_services.dart';
 
 class ChatStateManager {
+  final String chatId;
   final String friendName;
   final String friendId;
 
   final TextEditingController messageController = TextEditingController();
   final P2PServices _p2pServices = P2PServices();
 
-  String chatId = '';
   final ValueNotifier<List<P2PMessage>> messages = ValueNotifier([]);
-
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _messageSubscription;
 
-  ChatStateManager({required this.friendName, required this.friendId});
+  ChatStateManager({
+    required this.chatId,  // 传入 chatId
+    required this.friendName,
+    required this.friendId,
+  });
 
-  void initializeChat() async {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserId == null) {
-      print('[ERROR] User not logged in.');
-      return;
-    }
+  void initializeChat() {
+    _messageSubscription = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: false)
+        .snapshots()
+        .listen((snapshot) {
+      final newMessages = snapshot.docs.map((doc) {
+        try {
+          return P2PMessage.fromMap(doc.id, doc.data());
+        } catch (e) {
+          print('[ERROR] Failed to parse message: $e');
+          return null;
+        }
+      }).whereType<P2PMessage>().toList();
 
-    try {
-      chatId = await _p2pServices.chatService.createOrFetchChat([friendId, currentUserId]);
-
-      _messageSubscription = FirebaseFirestore.instance
-          .collection('chats')
-          .doc(chatId)
-          .collection('messages')
-          .orderBy('timestamp', descending: false)
-          .snapshots()
-          .listen((snapshot) {
-        final newMessages = snapshot.docs.map((doc) {
-          try {
-            return P2PMessage.fromMap(doc.id, doc.data());
-          } catch (e) {
-            print('[ERROR] Failed to parse message: $e');
-            return null;
-          }
-        }).whereType<P2PMessage>().toList();
-
-        messages.value = newMessages;
-        markMessagesAsRead();
-      });
-    } catch (e) {
-      print('[ERROR] Failed to initialize chat: $e');
-    }
+      messages.value = List.from(newMessages); // 确保 UI 重新渲染
+      markMessagesAsRead();
+    });
   }
 
   void markMessagesAsRead() {

@@ -10,13 +10,14 @@ class FriendsTab extends StatefulWidget {
 class _FriendsTabState extends State<FriendsTab> {
   final ScrollController _scrollController = ScrollController();
 
+  /// Scroll to a specific letter section
   void _scrollToLetter(String letter, List<String> keys) {
     final index = keys.indexOf(letter);
     if (index >= 0) {
-      final offset = index * 50.0; // Adjust for group height
+      final offset = index * 50.0;
       _scrollController.animateTo(
         offset,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -33,19 +34,14 @@ class _FriendsTabState extends State<FriendsTab> {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return Center(
-        child: Text('You need to log in to view friends.'),
-      );
+      return const Center(child: Text('You need to log in to view friends.'));
     }
 
     return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('friends')
-          .doc(currentUser.uid)
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('friends').doc(currentUser.uid).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.data() == null) {
@@ -83,61 +79,45 @@ class _FriendsTabState extends State<FriendsTab> {
               return _buildTopButton(
                 icon: Icons.group_add,
                 text: 'New Group',
-                onTap: () {
-                  // Future implementation
-                },
+                onTap: () {},
               );
             } else if (index == 2) {
               return _buildTopButton(
                 icon: Icons.settings,
                 text: 'Custom Server',
-                onTap: () {
-                  // Future implementation
-                },
+                onTap: () {},
               );
             } else if (!hasFriends && index == 3) {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
                 child: Center(
-                  child: Text(
-                    'No friends yet. Add some new friends!',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
+                  child: Text('No friends yet. Add some new friends!',
+                      style: TextStyle(fontSize: 16, color: Colors.grey)),
                 ),
               );
             } else {
               final letter = keys[index - 3];
               final friendsList = groupedFriends[letter]!;
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                     color: Colors.grey[200],
                     child: Text(
                       letter,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                   ...friendsList.map((friend) {
                     final friendName = friend['alias'] ?? 'Unknown';
-                    final friendId = friend['friendId'] ?? 'unknownId';
+                    final friendId = friend['friendId'] ?? '';
 
                     return ListTile(
                       title: Text(friendName),
-                      leading: CircleAvatar(
-                        child: Text(friendName[0]),
-                      ),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/person_chats_screen',
-                          arguments: {
-                            'friendName': friendName,
-                            'friendId': friendId,
-                          },
-                        );
-                      },
+                      leading: CircleAvatar(child: Text(friendName[0])),
+                      onTap: () => _navigateToChat(friendId, friendName),
                     );
                   }).toList(),
                 ],
@@ -156,10 +136,8 @@ class _FriendsTabState extends State<FriendsTab> {
                 onTap: () => _scrollToLetter(letter, keys),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
-                  child: Text(
-                    letter,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(letter,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
               );
             }).toList(),
@@ -167,6 +145,52 @@ class _FriendsTabState extends State<FriendsTab> {
         ),
       ],
     );
+  }
+
+  /// Navigate to the chat screen, ensuring `chatId` is created or fetched
+  Future<void> _navigateToChat(String friendId, String friendName) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null || friendId.isEmpty) return;
+
+    try {
+      final chatQuery = await FirebaseFirestore.instance
+          .collection('chats')
+          .where('participants', arrayContains: currentUser.uid)
+          .get();
+
+      String? chatId;
+
+      for (var doc in chatQuery.docs) {
+        final participants = List<String>.from(doc['participants']);
+        if (participants.contains(friendId)) {
+          chatId = doc.id;
+          break;
+        }
+      }
+
+      // If `chatId` doesn't exist, create a new chat
+      chatId ??= await FirebaseFirestore.instance.collection('chats').add({
+        'type': 'direct',
+        'participants': [currentUser.uid, friendId],
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'lastMessage': {},
+        'unreadCounts': {currentUser.uid: 0, friendId: 0},
+      }).then((doc) => doc.id);
+
+      // Navigate to chat screen with `chatId`
+      Navigator.pushNamed(
+        context,
+        '/person_chats_screen',
+        arguments: {
+          'chatId': chatId,
+          'friendName': friendName,
+          'friendId': friendId,
+        },
+      );
+    } catch (e) {
+      print('[ERROR] Failed to navigate to chat: $e');
+    }
   }
 
   /// Groups friends by the first letter of their alias.
@@ -190,10 +214,7 @@ class _FriendsTabState extends State<FriendsTab> {
   }) {
     return ListTile(
       leading: Icon(icon, color: Colors.green),
-      title: Text(
-        text,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
+      title: Text(text, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       onTap: onTap,
     );
   }

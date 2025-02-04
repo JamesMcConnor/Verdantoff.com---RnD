@@ -8,7 +8,7 @@ Future<String> createOrFetchChatFunction(List<String> participants) async {
   final firestore = FirebaseFirestore.instance;
 
   try {
-    participants.sort(); // 确保参与者顺序一致
+    participants.sort();
 
     final querySnapshot = await firestore
         .collection('chats')
