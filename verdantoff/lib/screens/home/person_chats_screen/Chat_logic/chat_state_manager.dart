@@ -18,7 +18,7 @@ class ChatStateManager {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _messageSubscription;
 
   ChatStateManager({
-    required this.chatId,  // 传入 chatId
+    required this.chatId,
     required this.friendName,
     required this.friendId,
   });
@@ -40,7 +40,7 @@ class ChatStateManager {
         }
       }).whereType<P2PMessage>().toList();
 
-      messages.value = List.from(newMessages); // 确保 UI 重新渲染
+      messages.value = List.from(newMessages);
       markMessagesAsRead();
     });
   }

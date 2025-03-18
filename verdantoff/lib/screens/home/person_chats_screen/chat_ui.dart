@@ -16,9 +16,9 @@ class ChatUI extends StatelessWidget {
       children: [
         TopBar(
           friendName: chatStateManager.friendName,
+          friendId: chatStateManager.friendId,
           onBack: () => Navigator.pop(context),
         ),
-
         ValueListenableBuilder<List<P2PMessage>>(
           valueListenable: chatStateManager.messages,
           builder: (context, messages, _) {
@@ -35,7 +35,6 @@ class ChatUI extends StatelessWidget {
             );
           },
         ),
-
         BottomInput(
           controller: chatStateManager.messageController,
           onSendMessage: chatStateManager.sendMessage,

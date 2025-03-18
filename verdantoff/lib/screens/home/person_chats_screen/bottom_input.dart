@@ -74,7 +74,10 @@ class _BottomInputState extends State<BottomInput> {
               color: Colors.green,
             ),
             onPressed: _hasText
-                ? widget.onSendMessage
+                ? () {
+              widget.onSendMessage();
+              widget.controller.clear();
+            }
                 : () {
               _showExtraOptions(context);
             },
@@ -97,12 +100,12 @@ class _BottomInputState extends State<BottomInput> {
             mainAxisSpacing: 8.0,
             crossAxisSpacing: 8.0,
             children: [
-              _buildExtraOption(Icons.camera_alt, 'Camera'),
-              _buildExtraOption(Icons.image, 'Image'),
-              _buildExtraOption(Icons.attach_file, 'File'),
-              _buildExtraOption(Icons.videocam, 'Video Call'),
-              _buildExtraOption(Icons.phone, 'Voice Call'),
-              _buildExtraOption(Icons.location_on, 'Location'),
+              _buildExtraOption(Icons.camera_alt, 'CameraTD'),
+              _buildExtraOption(Icons.image, 'ImageTD'),
+              _buildExtraOption(Icons.attach_file, 'FileTD'),
+              _buildExtraOption(Icons.videocam, 'Video CallTD'),
+              _buildExtraOption(Icons.phone, 'Voice CallTD'),
+              _buildExtraOption(Icons.location_on, 'LocationTD'),
             ],
           ),
         );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import '../../../PermissionManager/permission_prompt.dart';
 import '../Chat_list_screen/chat_list_screen.dart';
 import '../Contacts/friend_list_screen.dart';
 import '../Calendar/discover_screen.dart';
@@ -37,6 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchUserName(); // Fetch user data on screen initialization
+    // Delay execution to ensure context is available before calling the permission prompt dialog box
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      promptPermissionsIfNeeded(context);
+    });
   }
 
   /// Fetches the user's `userName` from Firestore.
@@ -108,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       : _currentIndex == 1
                       ? 'Contacts'
                       : _currentIndex == 2
-                      ? 'Calendar'
+                      ? 'Calendar(demo)'
                       : 'Me',
                   onNotificationTap: () {
                     // Navigate to the notifications screen

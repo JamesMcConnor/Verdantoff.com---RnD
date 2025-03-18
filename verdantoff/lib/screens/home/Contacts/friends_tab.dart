@@ -58,8 +58,8 @@ class _FriendsTabState extends State<FriendsTab> {
   }
 
   Widget _buildFriendsView(Map<String, List<Map<String, dynamic>>> groupedFriends, bool hasFriends) {
-    final keys = groupedFriends.keys.toList();
-    final itemCount = hasFriends ? groupedFriends.keys.length + 3 : 4;
+    final keys = groupedFriends.keys.toList()..sort();
+    final itemCount = hasFriends ? keys.length + 3 : 4;
 
     return Stack(
       children: [
@@ -98,6 +98,7 @@ class _FriendsTabState extends State<FriendsTab> {
             } else {
               final letter = keys[index - 3];
               final friendsList = groupedFriends[letter]!;
+              friendsList.sort((a, b) => (a['alias'] as String).compareTo(b['alias'] as String));
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

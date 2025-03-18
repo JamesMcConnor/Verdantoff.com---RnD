@@ -42,14 +42,21 @@ class ChatAreaActionMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.forward),
-            title: const Text('Forward'),
+            title: const Text('Forward(TD)'),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
             leading: const Icon(Icons.format_quote),
-            title: const Text('Quote'),
+            title: const Text('Quote(TD)'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add_card),
+            title: const Text('add to calender(TD)'),
             onTap: () {
               Navigator.pop(context);
             },

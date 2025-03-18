@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../user/FriendOperationScreen_AfterAdded/FriendOperationScreen.dart';
 
 class TopBar extends StatelessWidget {
   final String friendName;
+  final String friendId;
   final VoidCallback onBack;
 
   const TopBar({
     Key? key,
     required this.friendName,
+    required this.friendId,
     required this.onBack,
   }) : super(key: key);
 
@@ -35,10 +38,23 @@ class TopBar extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.info_outline, color: Colors.white),
+              icon: const Icon(Icons.phone, color: Colors.white),
               onPressed: () {
-                // Placeholder: Add logic to view chat info.
-                print('Chat info clicked');
+                print('Phone button click');
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FriendOperationScreen(
+                      friendName: friendName,
+                      friendId: friendId,
+                    ),
+                  ),
+                );
               },
             ),
           ],
