@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'friends_tab.dart';
-import 'groups_tab.dart';
+import 'Group_chat_tab/groups_tab.dart';
 import 'chats_tab.dart';
 
 class FriendListScreen extends StatefulWidget {

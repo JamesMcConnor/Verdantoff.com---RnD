@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chat_list_UI.dart';
-import '../Chat_list_screen/chat_list_screen_controller.dart';
+import 'chat_list_screen_controller.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({Key? key}) : super(key: key);
@@ -15,7 +15,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   void initState() {
     super.initState();
-    _controller.loadChats(); // Load chat list on screen init
+    _controller.loadChats();       // Loading personal chat
+    _controller.loadGroupChats(); // Loading group chat
   }
 
   @override
@@ -32,9 +33,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              onChanged: _controller.searchChats,
+              onChanged: (query) {
+                _controller.searchChats(query);
+                _controller.searchGroupChats(query);
+              },
               decoration: InputDecoration(
-                hintText: 'Search Contacts',
+                hintText: 'Search Contacts or Groups',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),

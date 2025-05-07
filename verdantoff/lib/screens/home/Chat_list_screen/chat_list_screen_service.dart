@@ -1,25 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import '../../../services/models/p2p_chat/p2p_chat_model.dart';
+import '../../../services/models/G2G_chat/GroupChats_DisplayOnChatsList.dart';
 
 class ChatListScreenService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  Map<String, String> _aliasCache = {}; // Cache to avoid redundant queries
 
-  /// ✅ **StreamController for UI updates**
-  final StreamController<List<P2PChat>> _chatsController =
-  StreamController<List<P2PChat>>.broadcast();
-
+  // --- P2P Chat Stream ---
+  final StreamController<List<P2PChat>> _chatsController = StreamController<List<P2PChat>>.broadcast();
   Stream<List<P2PChat>> get chatsStream => _chatsController.stream;
-
-  StreamSubscription<QuerySnapshot>? _chatsSubscription;
+  StreamSubscription? _chatsSubscription;
   List<P2PChat> _latestChats = [];
+  Map<String, String> _aliasCache = {};
 
-  /// **Listen for chat updates from Firestore**
+  // --- Group Chat Stream ---
+  final StreamController<List<GroupChatDisplayModel>> _groupChatsController = StreamController<List<GroupChatDisplayModel>>.broadcast();
+  Stream<List<GroupChatDisplayModel>> get groupChatsStream => _groupChatsController.stream;
+  StreamSubscription? _groupChatsSubscription;
+  List<GroupChatDisplayModel> _latestGroupChats = [];
+
+  /// ------------------ P2P CHATS ------------------
   void listenForChats(String userId) {
-    if (_chatsSubscription != null) {
-      return; // **Prevent duplicate listeners**
-    }
+    if (_chatsSubscription != null) return;
 
     _chatsSubscription = _firestore
         .collection('chats')
@@ -29,19 +31,12 @@ class ChatListScreenService {
         .listen((querySnapshot) async {
       _latestChats = await Future.wait(querySnapshot.docs.map((doc) async {
         P2PChat chat = P2PChat.fromMap(doc.id, doc.data());
-
-        // Check if lastMessage is withdrawn
         bool isRecalled = chat.lastMessage['isRecalled'] ?? false;
-        String lastMessageContent =
-        isRecalled ? 'This message has been recalled.' : chat.lastMessage['content'] ?? 'No messages yet';
+        String lastMessageContent = isRecalled
+            ? 'This message has been recalled.'
+            : chat.lastMessage['content'] ?? 'No messages yet';
 
-        // Get a friend's ID
-        String friendId = chat.participants.firstWhere(
-              (id) => id != userId,
-          orElse: () => '',
-        );
-
-        // Get a friend's alias
+        String friendId = chat.participants.firstWhere((id) => id != userId, orElse: () => '');
         String alias = await _fetchAlias(userId, friendId);
 
         return chat.copyWith(
@@ -54,43 +49,80 @@ class ChatListScreenService {
     });
   }
 
-  /// Get a friend's alias
   Future<String> _fetchAlias(String userId, String friendId) async {
-    if (_aliasCache.containsKey(friendId)) {
-      return _aliasCache[friendId]!; //Using Cache
-    }
+    if (_aliasCache.containsKey(friendId)) return _aliasCache[friendId]!;
 
     try {
-      DocumentSnapshot friendDoc = await _firestore.collection('friends').doc(userId).get();
-      Map<String, dynamic>? friendData = friendDoc.data() as Map<String, dynamic>?;
-
-      if (friendData != null && friendData['friends'] is List) {
-        var friend = friendData['friends'].firstWhere(
-              (f) => f['friendId'] == friendId,
-          orElse: () => null,
-        );
+      final friendDoc = await _firestore.collection('friends').doc(userId).get();
+      final data = friendDoc.data() as Map<String, dynamic>?;
+      final list = data?['friends'] as List?;
+      if (list != null) {
+        final friend = list.firstWhere((f) => f['friendId'] == friendId, orElse: () => null);
         if (friend != null) {
-          String alias = friend['alias'] ?? 'Unknown';
-          _aliasCache[friendId] = alias; // **缓存 alias**
+          final alias = friend['alias'] ?? 'Unknown';
+          _aliasCache[friendId] = alias;
           return alias;
         }
       }
     } catch (e) {
-      print('[ERROR] Failed to fetch alias: $e');
+      print('[ERROR] fetchAlias failed: $e');
     }
     return 'Unknown';
   }
 
-  /// Update chat list
   void _updateChatList() {
     if (!_chatsController.isClosed) {
       _chatsController.add(List.from(_latestChats));
     }
   }
 
-  /// Release resources
+  /// ------------------ GROUP CHATS ------------------
+  void listenForGroupChats(String userId) {
+    if (_groupChatsSubscription != null) return;
+
+    _groupChatsSubscription = _firestore
+        .collection('groups')
+        .where('roles.$userId', isNotEqualTo: null)
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .listen((querySnapshot) async {
+      _latestGroupChats = await Future.wait(querySnapshot.docs.map((doc) async {
+        final data = doc.data();
+        final lastMsg = data['lastMessage'] ?? {};
+        final groupName = data['name'] ?? 'Unnamed Group';
+        final unread = await _getUnreadCount(doc.id, userId);
+
+        return GroupChatDisplayModel(
+          groupId: doc.id,
+          groupName: groupName,
+          lastMessageContent: lastMsg['isRecalled'] == true ? 'Message recalled' : lastMsg['content'] ?? '',
+          lastMessageSenderName: lastMsg['senderName'] ?? '',
+          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          unreadCount: unread,
+          isLastMessageRecalled: lastMsg['isRecalled'] == true,
+        );
+
+      }).toList());
+
+      _updateGroupChatList();
+    });
+  }
+
+  Future<int> _getUnreadCount(String groupId, String userId) async {
+    final doc = await _firestore.collection('groups').doc(groupId).collection('members').doc(userId).get();
+    return doc['unreadCount'] ?? 0;
+  }
+
+  void _updateGroupChatList() {
+    if (!_groupChatsController.isClosed) {
+      _groupChatsController.add(List.from(_latestGroupChats));
+    }
+  }
+
   void dispose() {
     _chatsSubscription?.cancel();
     _chatsController.close();
+    _groupChatsSubscription?.cancel();
+    _groupChatsController.close();
   }
 }

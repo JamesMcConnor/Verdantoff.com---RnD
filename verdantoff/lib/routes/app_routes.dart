@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/home/Group_chats/group_chat_screen/UI/group_chat_screen.dart';
 import '../screens/home/Navigation_management/home_screen.dart';
 import '../screens/auth/forgot_password.dart';
 import '../screens/home/Notification_screen/notifications_screen.dart';
@@ -89,7 +90,20 @@ Route<dynamic>? generateRoute(RouteSettings settings) {
           );
         }
       }
-      return _errorRoute('Invalid arguments for /person_chats_screen');
+    case '/group_chat_screen':
+      if (settings.arguments is Map<String, dynamic>) {
+        final args = settings.arguments as Map<String, dynamic>;
+        if (args.containsKey('groupId') && args.containsKey('groupName')) {
+          return MaterialPageRoute(
+            builder: (context) => GroupChatScreen(
+              groupId: args['groupId'],
+              groupName: args['groupName'],
+            ),
+          );
+        }
+      }
+      return _errorRoute('Invalid arguments for /group_chat_screen');
+
 
     default:
       return _errorRoute('Route not defined: ${settings.name}');
