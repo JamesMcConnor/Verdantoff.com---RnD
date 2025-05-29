@@ -1,49 +1,53 @@
 import 'package:flutter/material.dart';
+import '../model/snm_notification_model.dart';
 
 class SNMNotificationRouter {
-  // Handle navigation when a notification is tapped
-  static void handleNotificationTap(BuildContext context, Map<String, dynamic> payload) {
-    if (payload.containsKey('type')) {
-      String notificationType = payload['type'];
+  /// Call **once** from FCM on-tap and on-message-opened-app.
+  static Future<void> handleNotificationTap(
+      BuildContext context, SNMNotificationModel n) async {
+    switch (n.type) {
+    /* ----------------- CHAT ----------------------------------------- */
+      case 'chat_message':
+        if (n.data['chatId'] != null) {
+          Navigator.pushNamed(
+            context,
+            '/person_chats_screen',
+            arguments: {
+              'chatId'    : n.data['chatId'],
+              'friendName': n.data['senderName'] ?? 'Friend',
+              'friendId'  : n.data['senderId'],
+            },
+          );
+        }
+        break;
 
-      switch (notificationType) {
-        case 'chat_message':
-          _navigateToChatScreen(context, payload['chatId']);
-          break;
-        case 'friend_request':
-          _navigateToFriendRequests(context);
-          break;
-        case 'voice_call':
-          _navigateToVoiceCall(context, payload);
-          break;
-        case 'video_call':
-          _navigateToVideoCall(context, payload);
-          break;
-        default:
-          print("⚠️ Unknown notification type: $notificationType");
-      }
+    /* ----------------- FRIEND REQUEST ------------------------------- */
+      case 'friend_request':
+        Navigator.pushNamed(context, '/friends_tab');
+        break;
+
+    /* ----------------- INCOMING CALL -------------------------------- */
+    // unified entry point for *any* call payload (voice / video / screen)
+      case 'incoming_call':
+      case 'voice_call':   // legacy alias
+      case 'video_call':
+        if (n.callId != null) {
+          Navigator.pushNamed(
+            context,
+            '/call/incoming',
+            arguments: {
+              'callId'  : n.callId,
+              'callType': n.callType,
+              'hostId'  : n.hostId,
+            },
+          );
+        }
+        break;
+
+    /* ----------------- DEFAULT / UNKNOWN --------------------------- */
+      default:
+      // Optionally show a toast or log
+        debugPrint('⚠️ Unknown notification type: ${n.type}');
     }
-  }
-
-  // Navigate to chat screen
-  static void _navigateToChatScreen(BuildContext context, String? chatId) {
-    if (chatId != null) {
-      Navigator.pushNamed(context, '/person_chats_screen', arguments: chatId);
-    }
-  }
-
-  // Navigate to friend request screen
-  static void _navigateToFriendRequests(BuildContext context) {
-    Navigator.pushNamed(context, '/friends_tab');
-  }
-
-  // Navigate to voice call screen
-  static void _navigateToVoiceCall(BuildContext context, Map<String, dynamic> data) {
-    Navigator.pushNamed(context, '/voice_call_screen', arguments: data);
-  }
-
-  // Navigate to video call screen
-  static void _navigateToVideoCall(BuildContext context, Map<String, dynamic> data) {
-    Navigator.pushNamed(context, '/video_call_screen', arguments: data);
   }
 }

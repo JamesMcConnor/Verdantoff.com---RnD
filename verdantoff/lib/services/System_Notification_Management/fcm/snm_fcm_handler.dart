@@ -1,21 +1,39 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import '../../../main.dart';
+
+import '../../../main.dart';                       // navigatorKey
+import '../model/snm_notification_model.dart';
 import '../manager/snm_notification_router.dart';
 
+/// Central entry-point for **every** FCM click / local-banner click.
 class SNMFCMHandler {
-  // Handle notification tap behavior
-  static void handleNotificationTap(RemoteMessage message) {
-    if (message.data.isNotEmpty) {
-      // Extract payload data
-      Map<String, dynamic> payload = message.data;
+  /* ───────────── handles system-banner & cold-start taps ────────────── */
+  static Future<void> handleNotificationTap(RemoteMessage m) async {
+    if (m.data.isEmpty) return;
 
-      // Delegate navigation to the notification router
-      if (navigatorKey.currentContext != null) {
-        SNMNotificationRouter.handleNotificationTap(navigatorKey.currentContext!, payload);
+    final notif = SNMNotificationModel.fromRemote(m.data);
+
+    void _route() {
+      final ctx = navigatorKey.currentContext;
+      if (ctx != null) {
+        SNMNotificationRouter.handleNotificationTap(ctx, notif);
       } else {
-        print("Error: navigatorKey.currentContext is null.");
+        debugPrint('[FCM] Navigator not ready – dropping tap for ${notif.id}');
       }
     }
+
+    if (navigatorKey.currentContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _route());
+    } else {
+      _route();
+    }
+  }
+
+  /* ───────────── handles taps on **local** in-app banners ───────────── */
+  static Future<void> handleNotificationTapFromData(
+      Map<String, dynamic> d,
+      ) async {
+    final fake = RemoteMessage(data: d);
+    await handleNotificationTap(fake);
   }
 }

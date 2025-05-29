@@ -26,18 +26,16 @@ class ChatUI extends StatelessWidget {
               messages: messages,
               friendName: chatStateManager.friendName,
               chatId: chatStateManager.chatId,
-              onNewMessage: (P2PMessage newMessage) {
-                chatStateManager.messages.value = [
-                  ...chatStateManager.messages.value,
-                  newMessage,
-                ];
-              },
+              onNewMessage: (P2PMessage m) =>
+              chatStateManager.messages.value = [...messages, m],
             );
           },
         ),
         BottomInput(
           controller: chatStateManager.messageController,
           onSendMessage: chatStateManager.sendMessage,
+          onStartVoiceCall: () => chatStateManager.startVoiceCall(context),
+          onStartVideoCall: () => chatStateManager.startVideoCall(context), // ← 新增
         ),
       ],
     );

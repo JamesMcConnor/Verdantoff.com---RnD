@@ -1,68 +1,80 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import '../fcm/snm_fcm_handler.dart';
+import '../model/snm_notification_model.dart';
+
 class SNMLocalNotificationService {
-  static final SNMLocalNotificationService _instance = SNMLocalNotificationService._internal();
-  factory SNMLocalNotificationService() => _instance;
+  static final SNMLocalNotificationService _i =
+  SNMLocalNotificationService._internal();
+  factory SNMLocalNotificationService() => _i;
   SNMLocalNotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final _plugin = FlutterLocalNotificationsPlugin();
 
-  Future<void> initialize() async {
-    // Android Initialization
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  /// Android channel id used by all in-app banners.
+  static const _channelId = 'verdant_chat';
+  static const _channelName = 'Verdant Notifications';
 
-    // Initialize plugin
-    final InitializationSettings settings = InitializationSettings(
-      android: androidSettings,
+  /* ───────────────────────── Init ─────────────────────────────── */
+
+  Future<void> initialise() async {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final settings = InitializationSettings(android: androidInit);
+
+    await _plugin.initialize(
+      settings,
+      // When user taps **local** banner (foreground) – forward to router.
+      onDidReceiveNotificationResponse: (resp) async {
+        if (resp.payload == null) return;
+        // parse back to model and let FCM handler drive navigation
+        // → reuse one path regardless of local/system banner origin
+        final data = jsonDecode(resp.payload!);
+        await SNMFCMHandler.handleNotificationTapFromData(data);
+      },
     );
 
-    await _notificationsPlugin.initialize(settings);
-
-    // Create notification channels for Android
     if (Platform.isAndroid) {
-      _createNotificationChannel();
+      const channel = AndroidNotificationChannel(
+        _channelId,
+        _channelName,
+        description: 'High-priority chat & call notifications',
+        importance: Importance.high,
+        playSound: true,
+      );
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
     }
   }
 
-  // Create Android Notification Channels
-  Future<void> _createNotificationChannel() async {
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'chat_notifications', // Channel ID
-      'Chat Notifications', // Channel Name
-      description: 'Notifications for new messages',
-      importance: Importance.high,
-      playSound: true,
-    );
+  /* ──────────────────────── Show banner ───────────────────────── */
 
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
-  }
-
-  // Display local notification
   Future<void> showNotification({
-    required String title,
+    required SNMNotificationModel model,
     required String body,
-    required Map<String, dynamic> payload,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'chat_notifications', // Channel ID
-      'Chat Notifications',
+    const androidDetails = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
       importance: Importance.high,
       priority: Priority.high,
       playSound: true,
     );
 
-    const NotificationDetails details = NotificationDetails(android: androidDetails);
+    final details = NotificationDetails(android: androidDetails);
 
-    await _notificationsPlugin.show(
-      0, // Notification ID
-      title,
+    await _plugin.show(
+      // Use hashCode as temp id (fine for single-banner apps)
+      model.hashCode,
+      model.title,
       body,
       details,
-      payload: payload.toString(),
+      payload: jsonEncode(model.toJson()),
     );
   }
 }
-

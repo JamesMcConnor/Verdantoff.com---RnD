@@ -1,0 +1,2 @@
+C:/Users/Markus Lee/Documents/GitHub/Verdantoff.com---RnD/verdantoff/android/app/.cxx/RelWithDebInfo/43396062/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Markus Lee/Documents/GitHub/Verdantoff.com---RnD/verdantoff/android/app/.cxx/RelWithDebInfo/43396062/x86_64/CMakeFiles/rebuild_cache.dir

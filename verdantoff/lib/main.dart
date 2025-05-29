@@ -31,7 +31,7 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // Initialize notification services.
-  await SNMNotificationManager().initialize();
+  await SNMNotificationManager().initialise();
  // Get and print the current FCM Token
   String? token = await FirebaseMessaging.instance.getToken();
   print("FCM Token: $token");

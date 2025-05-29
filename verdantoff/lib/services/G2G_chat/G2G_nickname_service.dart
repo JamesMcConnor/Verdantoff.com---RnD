@@ -19,7 +19,6 @@ class G2GNicknameService {
   /// Allows Owner or Admin to change another member's nickname
   Future<void> changeMemberNickname(String groupId, String targetUserId,
       String newNickname, String updatedBy) async {
-    // Optionally, verify "updatedBy" has permission before calling this method.
     await groupsCollection
         .doc(groupId)
         .collection('members')
@@ -28,7 +27,6 @@ class G2GNicknameService {
       'nickname': newNickname,
     });
 
-    // Optionally update group updatedAt metadata
     await groupsCollection.doc(groupId).update({
       'updatedAt': FieldValue.serverTimestamp(),
       'updatedBy': updatedBy,

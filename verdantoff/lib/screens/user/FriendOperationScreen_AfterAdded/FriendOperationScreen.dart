@@ -41,30 +41,16 @@ class FriendOperationScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.delete),
-            title: const Text('Delete Friend(todo)'),
+            title: const Text('Delete Friend'),
             onTap: () {
               print('Delete Friend');
             },
           ),
           ListTile(
             leading: const Icon(Icons.archive),
-            title: const Text('Export Chat History(todo)'),
+            title: const Text('Export Chat History'),
             onTap: () {
               print('Export Chat History');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('Search Chat History(todo)'),
-            onTap: () {
-              print('Search Chat History');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications_active),
-            title: const Text('Set Force Notification(todo)'),
-            onTap: () {
-              print('Set Force Notification');
             },
           ),
         ],

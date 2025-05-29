@@ -2,6 +2,7 @@ enum SNMNotificationType {
   chatMessage,
   friendRequest,
   voiceCall,
+  incomingCall,
   videoCall,
   systemAlert,  // Future extension for system notifications
 }
@@ -18,8 +19,8 @@ SNMNotificationType stringToNotificationType(String type) {
       return SNMNotificationType.chatMessage;
     case 'friendRequest':
       return SNMNotificationType.friendRequest;
-    case 'voiceCall':
-      return SNMNotificationType.voiceCall;
+    case 'incoming_call':
+      return SNMNotificationType.incomingCall;
     case 'videoCall':
       return SNMNotificationType.videoCall;
     case 'systemAlert':

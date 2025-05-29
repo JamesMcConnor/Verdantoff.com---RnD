@@ -38,12 +38,6 @@ class TopBar extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.phone, color: Colors.white),
-              onPressed: () {
-                print('Phone button click');
-              },
-            ),
-            IconButton(
               icon: const Icon(Icons.menu, color: Colors.white),
               onPressed: () {
                 Navigator.push(

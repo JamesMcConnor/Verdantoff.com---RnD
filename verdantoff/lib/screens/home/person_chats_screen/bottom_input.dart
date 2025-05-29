@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class BottomInput extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onSendMessage;
+  final Future<void> Function() onStartVoiceCall;
+  final Future<void> Function()? onStartVideoCall; // ← 新增
 
   const BottomInput({
     Key? key,
     required this.controller,
     required this.onSendMessage,
+    required this.onStartVoiceCall,
+    this.onStartVideoCall,                       // ← 新增
   }) : super(key: key);
 
   @override
@@ -15,7 +19,7 @@ class BottomInput extends StatefulWidget {
 }
 
 class _BottomInputState extends State<BottomInput> {
-  bool _hasText = false; // Determine if input has text
+  bool _hasText = false;
 
   @override
   void initState() {
@@ -30,9 +34,7 @@ class _BottomInputState extends State<BottomInput> {
   }
 
   void _onTextChanged() {
-    setState(() {
-      _hasText = widget.controller.text.isNotEmpty;
-    });
+    setState(() => _hasText = widget.controller.text.isNotEmpty);
   }
 
   @override
@@ -44,10 +46,7 @@ class _BottomInputState extends State<BottomInput> {
         children: [
           IconButton(
             icon: const Icon(Icons.mic, color: Colors.green),
-            onPressed: () {
-              // Placeholder for voice message
-              print('Voice message button clicked');
-            },
+            onPressed: () => print('Voice message button clicked'),
           ),
           Expanded(
             child: TextField(
@@ -56,56 +55,55 @@ class _BottomInputState extends State<BottomInput> {
                 hintText: 'Type a message...',
                 border: InputBorder.none,
               ),
-              onTap: () {
-                // Show the keyboard
-              },
             ),
           ),
           IconButton(
             icon: const Icon(Icons.emoji_emotions, color: Colors.green),
-            onPressed: () {
-              // Placeholder for emoji picker
-              print('Emoji picker button clicked');
-            },
+            onPressed: () => print('Emoji picker button clicked'),
           ),
           IconButton(
-            icon: Icon(
-              _hasText ? Icons.send : Icons.add,
-              color: Colors.green,
-            ),
+            icon: Icon(_hasText ? Icons.send : Icons.add, color: Colors.green),
             onPressed: _hasText
                 ? () {
               widget.onSendMessage();
               widget.controller.clear();
             }
-                : () {
-              _showExtraOptions(context);
-            },
+                : () => _showExtraOptions(context),
           ),
         ],
       ),
     );
   }
 
-  /// Shows extra options like camera, image, file, and location.
+  // ─────────────────────────────────────────────────────────────────────────
   void _showExtraOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return Container(
-          height: 250.0,
-          padding: const EdgeInsets.all(16.0),
+          height: 250,
+          padding: const EdgeInsets.all(16),
           child: GridView.count(
             crossAxisCount: 3,
-            mainAxisSpacing: 8.0,
-            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
             children: [
-              _buildExtraOption(Icons.camera_alt, 'CameraTD'),
-              _buildExtraOption(Icons.image, 'ImageTD'),
-              _buildExtraOption(Icons.attach_file, 'FileTD'),
-              _buildExtraOption(Icons.videocam, 'Video CallTD'),
-              _buildExtraOption(Icons.phone, 'Voice CallTD'),
-              _buildExtraOption(Icons.location_on, 'LocationTD'),
+              _buildExtraOption(Icons.camera_alt, 'Camera'),
+              _buildExtraOption(Icons.image, 'Image'),
+              _buildExtraOption(Icons.attach_file, 'File'),
+              // Video Call option
+              _buildExtraOption(Icons.videocam, 'Video Call', onTap: () async {
+                Navigator.pop(context);
+                if (widget.onStartVideoCall != null) {
+                  await widget.onStartVideoCall!(); // 调用上层逻辑
+                }
+              }),
+              // Voice Call option
+              _buildExtraOption(Icons.phone, 'Voice Call', onTap: () async {
+                Navigator.pop(context);
+                await widget.onStartVoiceCall();
+              }),
+              _buildExtraOption(Icons.location_on, 'Location'),
             ],
           ),
         );
@@ -113,19 +111,22 @@ class _BottomInputState extends State<BottomInput> {
     );
   }
 
-  /// Builds individual extra option icons.
-  Widget _buildExtraOption(IconData icon, String label) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 30.0,
-          child: Icon(icon, size: 24.0, color: Colors.white),
-          backgroundColor: Colors.green,
-        ),
-        const SizedBox(height: 8.0),
-        Text(label, style: const TextStyle(fontSize: 14.0)),
-      ],
+  Widget _buildExtraOption(IconData icon, String label,
+      {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.green,
+            child: Icon(icon, color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 14)),
+        ],
+      ),
     );
   }
 }
