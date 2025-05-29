@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "889775322897",
+    "project_id": "verdantoff-929f7",
+    "storage_bucket": "verdantoff-929f7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889775322897:android:2894e786e97c45be747eb0",
+        "android_client_info": {
+          "package_name": "com.FrontierTechnologies.Verdantoff"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEw0FIjF0ipeiC8LbrgsMR4P3HTv3tZaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

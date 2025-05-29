@@ -1,0 +1,2 @@
+C:/Users/Markus Lee/Documents/GitHub/Verdantoff.com---RnD/verdantoff/android/app/.cxx/RelWithDebInfo/43396062/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Markus Lee/Documents/GitHub/Verdantoff.com---RnD/verdantoff/android/app/.cxx/RelWithDebInfo/43396062/armeabi-v7a/CMakeFiles/rebuild_cache.dir
