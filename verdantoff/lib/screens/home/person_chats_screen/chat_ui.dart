@@ -14,6 +14,23 @@ class ChatUI extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Add error display for upload errors
+        ValueListenableBuilder<String?>(
+          valueListenable: chatStateManager.uploadError,
+          builder: (context, error, _) {
+            return error != null
+                ? Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              color: Colors.red,
+              child: Text(
+                error,
+                style: const TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            )
+                : const SizedBox();
+          },
+        ),
         TopBar(
           friendName: chatStateManager.friendName,
           friendId: chatStateManager.friendId,
@@ -35,7 +52,9 @@ class ChatUI extends StatelessWidget {
           controller: chatStateManager.messageController,
           onSendMessage: chatStateManager.sendMessage,
           onStartVoiceCall: () => chatStateManager.startVoiceCall(context),
-          onStartVideoCall: () => chatStateManager.startVideoCall(context), // ← 新增
+          onStartVideoCall: () => chatStateManager.startVideoCall(context),
+          onSendImage: chatStateManager.sendImage, // Pass image callback
+          onSendFile: chatStateManager.sendFile, // Pass file callback
         ),
       ],
     );

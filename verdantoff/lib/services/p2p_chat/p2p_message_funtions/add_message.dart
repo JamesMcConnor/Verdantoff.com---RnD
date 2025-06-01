@@ -37,19 +37,35 @@ Future<P2PMessage> addMessageFunction(String chatId, P2PMessage message) async {
     // Save the message to Firestore
     await newMessageRef.set(messageMap);
 
+    // Generate preview content based on message type
+    String previewContent = message.content;
+    Map<String, dynamic>? filePreview;
+
+    if (message.type != 'text' && message.fileMeta != null) {
+      previewContent = message.type == 'image'
+          ? '[Image]'
+          : '[File] ${message.fileMeta!['fileName']}';
+
+      filePreview = {
+        'type': message.type,
+        'name': message.fileMeta!['fileName']
+      };
+    }
+
     // Update the parent chat document with the latest message details
     await firestore.collection('chats').doc(chatId).update({
       'lastMessage': {
-        'id': newMessageRef.id, // Store the new message ID
-        'content': message.content, // Store the message content
-        'senderId': message.senderId, // Store sender's ID
-        'type': message.type, // Store message type (e.g., text, image)
-        'timestamp': message.timestamp, // Store message timestamp
-        'isRecalled': message.isRecalled, // Store message recall status
+        'id': newMessageRef.id,
+        'content': previewContent,
+        'senderId': message.senderId,
+        'type': message.type,
+        'timestamp': message.timestamp,
+        'isRecalled': message.isRecalled,
+        'filePreview': filePreview,
       },
-      'updatedAt': FieldValue.serverTimestamp(), // Update the last modified timestamp
-      'unreadCounts.${message.senderId}': 0, // Reset unread count for the sender
-      'unreadCounts.${messageMap['receiverId']}': FieldValue.increment(1), // Increment unread count for the recipient
+      'updatedAt': FieldValue.serverTimestamp(),
+      'unreadCounts.${message.senderId}': 0,
+      'unreadCounts.${messageMap['receiverId']}': FieldValue.increment(1),
     });
 
     // Log success message

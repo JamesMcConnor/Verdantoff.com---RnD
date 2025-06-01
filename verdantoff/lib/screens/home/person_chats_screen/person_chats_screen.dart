@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // 添加这行导入
 import 'chat_ui.dart';
 import 'Chat_logic/chat_state_manager.dart';
 
@@ -40,8 +41,11 @@ class _PersonChatsScreenState extends State<PersonChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChatUI(chatStateManager: _chatStateManager),
+    return Provider<ChatStateManager>.value( // 添加 Provider
+      value: _chatStateManager,
+      child: Scaffold(
+        body: ChatUI(chatStateManager: _chatStateManager),
+      ),
     );
   }
 }
