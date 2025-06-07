@@ -10,6 +10,7 @@ import '../screens/calls/person_voice/Person_active_page.dart';
 import '../screens/calls/person_voice/Person_incoming_page.dart';
 import '../screens/calls/person_voice/person_voice_vm.dart';
 import '../screens/calls/person_voice/Person_waiting_page.dart';
+import '../screens/home/Contacts/Group_chat_tab/groups_tab.dart';
 import '../screens/home/Group_chats/group_chat_screen/UI/group_chat_screen.dart';
 import '../screens/home/Navigation_management/home_screen.dart';
 import '../screens/auth/forgot_password.dart';

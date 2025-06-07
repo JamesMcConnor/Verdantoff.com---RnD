@@ -39,25 +39,41 @@ class PeerConnectionManager {
   // ===================================
 
   // TURN / STUN configuration
-  static const _iceConfig = {
+  static const Map<String, dynamic> _iceConfig = {
     'iceServers': [
+      // 0) First put a UDP 443 TURN (many operators allow 443/udp)
+      {
+        'urls': ['turn:markusxu.uk:443?transport=udp'],
+        'username': 'verdant',
+        'credential': 'off123',
+      },
+
+      // 1) STUN is the backup, if a hole can be found, just go to P2P
+      { 'urls': ['stun:stun.l.google.com:19302'] },
+
+      // 2) TCP 443 TURN — Mobile networks can definitely pass
+      {
+        'urls': ['turn:markusxu.uk:443?transport=tcp'],
+        'username': 'verdant',
+        'credential': 'off123',
+      },
+
+      // 3) Traditional 3478/udp + 5349/tcp, put last
       {
         'urls': [
-          'turns:markusxu.uk:443?transport=tcp',
-          'turns:markusxu.uk:5349?transport=tcp',
+          'turn:markusxu.uk:3478?transport=udp',
+          'turn:markusxu.uk:5349?transport=tcp',
         ],
         'username': 'verdant',
         'credential': 'off123',
       },
-      {
-        'urls': ['turn:markusxu.uk:3478?transport=udp'],
-        'username': 'verdant',
-        'credential': 'off123',
-      },
-      { 'urls': ['stun:stun.l.google.com:19302'] },
     ],
+
+
     'iceTransportPolicy': 'all',
   };
+
+
 
   // Constraints for offer/answer SDP creation.
   static const _sdpConstraints = {

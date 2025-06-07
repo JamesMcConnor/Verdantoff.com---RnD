@@ -7,7 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 class PermissionManager {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
-  // --------------------------- Notification ------------------------------- //
+  // ──────────────────  Notification  ──────────────────
   Future<bool> requestNotificationPermission() async {
     bool androidGranted = true;
 
@@ -40,9 +40,9 @@ class PermissionManager {
     return androidGranted && fcmGranted;
   }
 
-  // ----------------------- Background Execution --------------------------- //
+  // ────────────────  Background Execution (Android)  ─────────────────
   Future<bool> requestBackgroundExecution() async {
-    if (!Platform.isAndroid) return true; // iOS 不需要后台权限
+    if (!Platform.isAndroid) return true;
 
     if (await FlutterBackground.hasPermissions) {
       print('✅ Background permission already granted');
@@ -53,7 +53,10 @@ class PermissionManager {
       notificationTitle: 'Background Service',
       notificationText: 'App is running in background to receive messages.',
       notificationImportance: AndroidNotificationImportance.high,
-      notificationIcon: AndroidResource(name: 'ic_launcher', defType: 'drawable'),
+      notificationIcon: AndroidResource(
+        name: 'ic_launcher',
+        defType: 'drawable',
+      ),
     );
 
     final ok = await FlutterBackground.initialize(androidConfig: androidConfig);
@@ -65,28 +68,14 @@ class PermissionManager {
 
   Future<bool> checkBackgroundExecution() async {
     if (!Platform.isAndroid) return true;
-    return await FlutterBackground.hasPermissions;
+    return FlutterBackground.hasPermissions;
   }
 
-  // ------------------------------ Location -------------------------------- //
-  Future<bool> requestLocationPermission() async {
-    final status = await Permission.location.request();
-    print(status.isGranted
-        ? '✅ Location permission granted'
-        : '❌ Location permission denied');
-    return status.isGranted;
-  }
 
-  Future<bool> checkLocationPermission() async {
-    return (await Permission.location.status).isGranted;
-  }
-
-  // ------------------------------ Helpers --------------------------------- //
   Future<void> requestAllPermissions() async {
     await Future.wait([
       requestNotificationPermission(),
       requestBackgroundExecution(),
-      requestLocationPermission(),
     ]);
   }
 
@@ -94,7 +83,6 @@ class PermissionManager {
     final results = await Future.wait<bool>([
       checkNotificationPermission(),
       checkBackgroundExecution(),
-      checkLocationPermission(),
     ]);
     return results.every((granted) => granted);
   }

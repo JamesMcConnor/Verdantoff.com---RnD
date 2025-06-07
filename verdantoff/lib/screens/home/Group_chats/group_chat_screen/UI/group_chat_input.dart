@@ -40,12 +40,6 @@ class _GroupChatInputState extends State<GroupChatInput> {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.mic, color: Colors.green),
-            onPressed: () {
-              print('Voice message button clicked');
-            },
-          ),
           Expanded(
             child: TextField(
               controller: vm.messageController,
@@ -56,63 +50,16 @@ class _GroupChatInputState extends State<GroupChatInput> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.emoji_emotions, color: Colors.green),
-            onPressed: () {
-              print('Emoji picker button clicked');
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              _hasText ? Icons.send : Icons.add,
-              color: Colors.green,
-            ),
+            icon: const Icon(Icons.send, color: Colors.green),
             onPressed: _hasText
                 ? () {
               vm.sendTextMessage();
               vm.messageController.clear();
             }
-                : () => _showExtraOptions(context),
+                : null,
           ),
         ],
       ),
-    );
-  }
-
-  void _showExtraOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => Container(
-        height: 250.0,
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 3,
-          mainAxisSpacing: 8.0,
-          crossAxisSpacing: 8.0,
-          children: [
-            _buildExtraOption(Icons.camera_alt, 'CameraTD'),
-            _buildExtraOption(Icons.image, 'ImageTD'),
-            _buildExtraOption(Icons.attach_file, 'FileTD'),
-            _buildExtraOption(Icons.videocam, 'Video CallTD'),
-            _buildExtraOption(Icons.phone, 'Voice CallTD'),
-            _buildExtraOption(Icons.location_on, 'LocationTD'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExtraOption(IconData icon, String label) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 30.0,
-          backgroundColor: Colors.green,
-          child: Icon(icon, size: 24.0, color: Colors.white),
-        ),
-        const SizedBox(height: 8.0),
-        Text(label, style: const TextStyle(fontSize: 14.0)),
-      ],
     );
   }
 }

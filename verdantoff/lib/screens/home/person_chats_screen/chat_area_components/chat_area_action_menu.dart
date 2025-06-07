@@ -57,14 +57,6 @@ class ChatAreaActionMenu extends StatelessWidget {
               ChatActionCopy.copyMessage(message.content);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.forward),
-            title: const Text('Forward'),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: Implement forward functionality
-            },
-          ),
           // Only show edit/recall if not recalled and within edit window
           if (isMe && isEditable && !isRecalled)
             ListTile(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';               // ← 新增
 import '../../../services/models/p2p_chat/p2p_chat_model.dart';
 
 class ChatListItemUI extends StatelessWidget {
@@ -20,23 +21,31 @@ class ChatListItemUI extends StatelessWidget {
       ),
       trailing: Text(
         formatLastMessageTime(chat.updatedAt),
-        style: TextStyle(fontSize: 12, color: Colors.grey),
+        style: const TextStyle(fontSize: 12, color: Colors.grey),
       ),
       onTap: () {
+
+        final myUid = FirebaseAuth.instance.currentUser!.uid;
+
+        final friendUid = chat.participants.firstWhere(
+              (id) => id != myUid,
+          orElse: () => myUid,
+        );
+
         Navigator.pushNamed(
           context,
           '/person_chats_screen',
           arguments: {
             'chatId': chat.id,
             'friendName': chat.alias ?? 'Unknown',
-            'friendId': chat.participants.firstWhere((id) => id != chat.id),
+            'friendId': friendUid,
           },
         );
       },
     );
   }
 
-  /// Formats the timestamp for last message
+  /// Formats the timestamp for the last message
   String formatLastMessageTime(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);

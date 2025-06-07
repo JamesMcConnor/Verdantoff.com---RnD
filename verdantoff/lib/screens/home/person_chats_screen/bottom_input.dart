@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart'; // 确保这行导入存在
-import 'Chat_logic/chat_state_manager.dart'; // 确保这行导入存在
+import 'package:provider/provider.dart';
+import 'Chat_logic/chat_state_manager.dart';
 
 class BottomInput extends StatefulWidget {
   final TextEditingController controller;
@@ -46,7 +45,6 @@ class _BottomInputState extends State<BottomInput> {
 
   @override
   Widget build(BuildContext context) {
-    // 获取 ChatStateManager 实例
     final chatStateManager = Provider.of<ChatStateManager>(context, listen: true);
 
     return Container(
@@ -54,9 +52,8 @@ class _BottomInputState extends State<BottomInput> {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
       child: Column(
         children: [
-          // Upload progress indicator - 使用从 provider 获取的实例
           ValueListenableBuilder<double?>(
-            valueListenable: chatStateManager.uploadProgress, // 使用获取的实例
+            valueListenable: chatStateManager.uploadProgress,
             builder: (context, progress, _) {
               return progress != null
                   ? LinearProgressIndicator(value: progress)
@@ -65,10 +62,6 @@ class _BottomInputState extends State<BottomInput> {
           ),
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.mic, color: Colors.green),
-                onPressed: () => print('Voice message button clicked'),
-              ),
               Expanded(
                 child: TextField(
                   controller: widget.controller,
@@ -77,10 +70,6 @@ class _BottomInputState extends State<BottomInput> {
                     border: InputBorder.none,
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.emoji_emotions, color: Colors.green),
-                onPressed: () => print('Emoji picker button clicked'),
               ),
               IconButton(
                 icon: Icon(_hasText ? Icons.send : Icons.add, color: Colors.green),
@@ -110,7 +99,6 @@ class _BottomInputState extends State<BottomInput> {
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
             children: [
-              _buildExtraOption(Icons.camera_alt, 'Camera', onTap: _takePhoto),
               _buildExtraOption(Icons.image, 'Gallery', onTap: widget.onSendImage),
               _buildExtraOption(Icons.attach_file, 'File', onTap: widget.onSendFile),
               _buildExtraOption(Icons.videocam, 'Video Call', onTap: () async {
@@ -123,24 +111,11 @@ class _BottomInputState extends State<BottomInput> {
                 Navigator.pop(context);
                 await widget.onStartVoiceCall();
               }),
-              _buildExtraOption(Icons.location_on, 'Location'),
             ],
           ),
         );
       },
     );
-  }
-
-  Future<void> _takePhoto() async {
-    try {
-      final XFile? photo = await ImagePicker().pickImage(source: ImageSource.camera);
-      if (photo != null) {
-        // 这里应该调用发送图片的方法
-        // 例如: widget.onSendImage();
-      }
-    } catch (e) {
-      print('[ERROR] Camera error: $e');
-    }
   }
 
   Widget _buildExtraOption(IconData icon, String label, {VoidCallback? onTap}) {

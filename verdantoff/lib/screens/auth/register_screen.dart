@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_service.dart';
 import '../home/Navigation_management/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // 新增
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -18,33 +19,60 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
-  void _register() async {
+  bool _isLoading = false;
+
+  Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       final userName = _userNameController.text.trim();
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
-      print('Attempting to register: $email with username: $userName');
-      final user = await _authService.registerWithUserName(email, password, userName);
+      setState(() {
+        _isLoading = true;
+      });
 
-      if (user != null) {
-        print('Registration successful for: ${user.email}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Welcome, $userName')),
-        );
+      try {
+        print('Attempting to register: $email with username: $userName');
+        final user = await _authService.registerWithUserName(email, password, userName);
 
-        // ✅ After successful registration, jump to `HomeScreen` (no need to pass userName）
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(), // ✅ `HomeScreen` no need `userName`
-          ),
-        );
-      } else {
-        print('Registration failed. Check logs for details.');
+        if (user != null) {
+          print('Registration successful for: ${user.email}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Welcome, $userName')),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
+        } else {
+          // 正常流程不会走到这里
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration Failed. Please try again.')),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMsg = 'Registration Failed. Please try again.';
+        if (e.code == 'email-already-in-use') {
+          errorMsg = 'This email is already registered.';
+        } else if (e.code == 'invalid-email') {
+          errorMsg = 'Invalid email format.';
+        } else if (e.code == 'weak-password') {
+          errorMsg = 'Password is too weak (at least 8 characters).';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration Failed. Please try again.')),
+          SnackBar(content: Text(errorMsg)),
         );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -61,7 +89,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Username input box
                 TextFormField(
                   controller: _userNameController,
                   decoration: const InputDecoration(labelText: 'User Name'),
@@ -73,8 +100,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Email input box
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
@@ -90,8 +115,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Password input box
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(labelText: 'Password'),
@@ -107,8 +130,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Confirm password input box
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: const InputDecoration(labelText: 'Confirm Password'),
@@ -124,9 +145,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 32),
-
-                // Register Button
-                ElevatedButton(
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
                   onPressed: _register,
                   child: const Text('Register'),
                 ),

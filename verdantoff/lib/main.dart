@@ -7,6 +7,7 @@ import 'package:verdantoff/screens/auth/login_screen.dart';
 import 'package:verdantoff/screens/home/Navigation_management/home_screen.dart';
 import 'package:verdantoff/services/System_Notification_Management/manager/snm_notification_manager.dart';
 import 'PermissionManager/permission_manager.dart';
+import 'fcm/fcm_token_manager.dart';
 import 'routes/app_routes.dart';
 
 // Global navigator key for navigation from background messages.
@@ -27,6 +28,8 @@ void main() async {
   // Unified request permissions
   await PermissionManager().requestAllPermissions();
 
+  await FcmTokenManager.initialise();
+
   // Register the background message handler.
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -34,7 +37,6 @@ void main() async {
   await SNMNotificationManager().initialise();
  // Get and print the current FCM Token
   String? token = await FirebaseMessaging.instance.getToken();
-  print("FCM Token: $token");
 
   runApp(MyApp());
 }

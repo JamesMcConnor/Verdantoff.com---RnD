@@ -28,27 +28,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              onChanged: (query) {
-                _controller.searchChats(query);
-                _controller.searchGroupChats(query);
-              },
-              decoration: InputDecoration(
-                hintText: 'Search Contacts or Groups',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-          ),
-          Expanded(child: ChatListUI(controller: _controller)),
-        ],
-      ),
+      body: ChatListUI(controller: _controller),
     );
   }
 }

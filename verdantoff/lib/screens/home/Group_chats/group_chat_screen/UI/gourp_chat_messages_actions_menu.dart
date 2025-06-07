@@ -34,16 +34,6 @@ class GroupChatMessagesActionsMenu extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: const Icon(Icons.format_quote),
-          title: const Text('Quote (Future)'),
-          onTap: () => Navigator.pop(context),
-        ),
-        ListTile(
-          leading: const Icon(Icons.forward),
-          title: const Text('Forward (Future)'),
-          onTap: () => Navigator.pop(context),
-        ),
-        ListTile(
           leading: const Icon(Icons.remove_red_eye),
           title: const Text('Who Read'),
           onTap: () {
