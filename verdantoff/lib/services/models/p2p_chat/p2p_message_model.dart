@@ -35,6 +35,9 @@ class P2PMessage {
   /// Indicates whether the message has been edited.
   final bool isEdited;
 
+  /// Metadata for file-based messages (images/files)
+  final Map<String, dynamic>? fileMeta;
+
   /// Constructor for initializing a `P2PMessage` instance.
   P2PMessage({
     required this.id,
@@ -47,6 +50,7 @@ class P2PMessage {
     required this.isRecalled,
     required this.isReadBy,
     required this.isEdited,
+    this.fileMeta,
   });
 
   /// Factory constructor to create a `P2PMessage` instance from Firestore data.
@@ -59,18 +63,21 @@ class P2PMessage {
     try {
       return P2PMessage(
         id: id,
-        senderId: data['senderId'] ?? '', // Defaults to an empty string if senderId is null
-        type: data['type'] ?? 'text', // Defaults to 'text' if type is not specified
-        content: data['content'] ?? '', // Defaults to an empty string if content is null
-        attachments: List<Map<String, dynamic>>.from(data['attachments'] ?? []), // Ensures a valid list
-        timestamp: (data['timestamp'] as Timestamp).toDate(), // Converts Firestore Timestamp to DateTime
-        editableUntil: (data['editableUntil'] as Timestamp).toDate(), // Converts Firestore Timestamp to DateTime
-        isRecalled: data['isRecalled'] ?? false, // Defaults to false if not provided
-        isReadBy: List<String>.from(data['isReadBy'] ?? []), // Ensures a valid list
-        isEdited: data['isEdited'] ?? false, // Defaults to false if not provided
+        senderId: data['senderId'] ?? '',
+        type: data['type'] ?? 'text',
+        content: data['content'] ?? '',
+        attachments: List<Map<String, dynamic>>.from(data['attachments'] ?? []),
+        timestamp: (data['timestamp'] as Timestamp).toDate(),
+        editableUntil: (data['editableUntil'] as Timestamp).toDate(),
+        isRecalled: data['isRecalled'] ?? false,
+        isReadBy: List<String>.from(data['isReadBy'] ?? []),
+        isEdited: data['isEdited'] ?? false,
+        fileMeta: data['fileMeta'] != null
+            ? Map<String, dynamic>.from(data['fileMeta'])
+            : null,
       );
     } catch (e) {
-      throw Exception('[ERROR] Failed to parse message: $e'); // Handles any parsing errors
+      throw Exception('[ERROR] Failed to parse message: $e');
     }
   }
 
@@ -88,6 +95,7 @@ class P2PMessage {
       'isRecalled': isRecalled,
       'isReadBy': isReadBy,
       'isEdited': isEdited,
+      'fileMeta': fileMeta,
     };
   }
 
@@ -103,6 +111,7 @@ class P2PMessage {
   /// - [isRecalled]: Whether the message has been recalled (optional).
   /// - [isReadBy]: Updated list of users who have read the message (optional).
   /// - [isEdited]: Whether the message has been edited (optional).
+  /// - [fileMeta]: Updated file metadata (optional).
   ///
   /// This method allows for immutable updates without modifying the original object.
   P2PMessage copyWith({
@@ -116,6 +125,7 @@ class P2PMessage {
     bool? isRecalled,
     List<String>? isReadBy,
     bool? isEdited,
+    Map<String, dynamic>? fileMeta,
   }) {
     return P2PMessage(
       id: id ?? this.id,
@@ -128,6 +138,7 @@ class P2PMessage {
       isRecalled: isRecalled ?? this.isRecalled,
       isReadBy: isReadBy ?? this.isReadBy,
       isEdited: isEdited ?? this.isEdited,
+      fileMeta: fileMeta ?? this.fileMeta,
     );
   }
 }

@@ -1,7 +1,3 @@
-/// P2P Message Service
-/// This service class provides an abstraction layer for managing peer-to-peer (P2P) messages.
-/// It encapsulates all message-related functions, simplifying their usage throughout the application.
-
 import '../models/p2p_chat/p2p_message_model.dart';
 import 'p2p_message_funtions/add_message.dart';
 import 'p2p_message_funtions/edit_message.dart';
@@ -10,13 +6,27 @@ import 'p2p_message_funtions/mark_message_as_read.dart';
 import 'p2p_message_funtions/recall_message.dart';
 
 /// Service class for handling peer-to-peer messaging operations.
+/// Now supports image and file message types in addition to text.
 class P2PMessageService {
   /// Sends a new message in a specific chat session and stores it in Firestore.
+  ///
+  /// Supports the following message types:
+  /// - 'text': Standard text message
+  /// - 'image': Image message (requires fileMeta data)
+  /// - 'file': File message (requires fileMeta data)
   ///
   /// - [chatId]: The unique ID of the chat session where the message is sent.
   /// - [message]: The `P2PMessage` object containing the message details.
   /// - Returns: A `Future<P2PMessage>` with the saved message, including its Firestore-generated ID.
+  ///
+  /// Throws ArgumentError if file message doesn't include fileMeta data.
   Future<P2PMessage> addMessage(String chatId, P2PMessage message) {
+    // Validate file messages have required metadata
+    if (message.type == 'image' || message.type == 'file') {
+      if (message.fileMeta == null) {
+        throw ArgumentError('File messages require fileMeta data');
+      }
+    }
     return addMessageFunction(chatId, message);
   }
 

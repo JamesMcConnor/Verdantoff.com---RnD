@@ -10,7 +10,6 @@ class FriendsTab extends StatefulWidget {
 class _FriendsTabState extends State<FriendsTab> {
   final ScrollController _scrollController = ScrollController();
 
-  /// Scroll to a specific letter section
   void _scrollToLetter(String letter, List<String> keys) {
     final index = keys.indexOf(letter);
     if (index >= 0) {
@@ -45,7 +44,7 @@ class _FriendsTabState extends State<FriendsTab> {
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.data() == null) {
-          return _buildFriendsView({}, false); // No friends data
+          return _buildFriendsView({}, false);
         }
 
         final friendsData = snapshot.data!.data() as Map<String, dynamic>;
@@ -57,9 +56,10 @@ class _FriendsTabState extends State<FriendsTab> {
     );
   }
 
+  // 删除 Custom Server，只保留一个顶栏按钮
   Widget _buildFriendsView(Map<String, List<Map<String, dynamic>>> groupedFriends, bool hasFriends) {
     final keys = groupedFriends.keys.toList()..sort();
-    final itemCount = hasFriends ? keys.length + 3 : 4;
+    final itemCount = hasFriends ? keys.length + 1 : 2;
 
     return Stack(
       children: [
@@ -75,19 +75,7 @@ class _FriendsTabState extends State<FriendsTab> {
                   Navigator.pushNamed(context, '/user-search');
                 },
               );
-            } else if (index == 1) {
-              return _buildTopButton(
-                icon: Icons.group_add,
-                text: 'New Group',
-                onTap: () {},
-              );
-            } else if (index == 2) {
-              return _buildTopButton(
-                icon: Icons.settings,
-                text: 'Custom Server',
-                onTap: () {},
-              );
-            } else if (!hasFriends && index == 3) {
+            } else if (!hasFriends && index == 1) {
               return const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Center(
@@ -96,7 +84,7 @@ class _FriendsTabState extends State<FriendsTab> {
                 ),
               );
             } else {
-              final letter = keys[index - 3];
+              final letter = keys[index - 1];
               final friendsList = groupedFriends[letter]!;
               friendsList.sort((a, b) => (a['alias'] as String).compareTo(b['alias'] as String));
 
@@ -148,7 +136,6 @@ class _FriendsTabState extends State<FriendsTab> {
     );
   }
 
-  /// Navigate to the chat screen, ensuring `chatId` is created or fetched
   Future<void> _navigateToChat(String friendId, String friendName) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null || friendId.isEmpty) return;
@@ -169,7 +156,6 @@ class _FriendsTabState extends State<FriendsTab> {
         }
       }
 
-      // If `chatId` doesn't exist, create a new chat
       chatId ??= await FirebaseFirestore.instance.collection('chats').add({
         'type': 'direct',
         'participants': [currentUser.uid, friendId],
@@ -179,7 +165,6 @@ class _FriendsTabState extends State<FriendsTab> {
         'unreadCounts': {currentUser.uid: 0, friendId: 0},
       }).then((doc) => doc.id);
 
-      // Navigate to chat screen with `chatId`
       Navigator.pushNamed(
         context,
         '/person_chats_screen',
@@ -194,7 +179,6 @@ class _FriendsTabState extends State<FriendsTab> {
     }
   }
 
-  /// Groups friends by the first letter of their alias.
   Map<String, List<Map<String, dynamic>>> _groupFriendsByLetter(List<dynamic> friends) {
     final Map<String, List<Map<String, dynamic>>> grouped = {};
     for (var friend in friends) {

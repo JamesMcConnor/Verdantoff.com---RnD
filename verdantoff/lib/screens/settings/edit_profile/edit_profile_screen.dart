@@ -1,48 +1,54 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
 import 'edit_profile_controller.dart';
 import 'edit_profile_view.dart';
 
-/// Entry point for editing user profile.
-/// Manages state and updates user data dynamically after changes.
+/// Entry point for editing a user profile.
+///
+/// The screen itself is only a thin wrapper that:
+///   • fetches Firestore user-data through [EditProfileController]
+///   • hands that Future to [EditProfileView]
+///   • refreshes after any field / photo update
 class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({Key? key}) : super(key: key);   // ← const ctor!
+
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final EditProfileController _controller = EditProfileController();
-  late Completer<DocumentSnapshot> _userDataCompleter;
+
+  /// Holds the latest user-document future. Re-created on every refresh.
+  late Future<DocumentSnapshot> _userDocFuture;
 
   @override
   void initState() {
     super.initState();
-    _refreshUserData();
+    _reloadUserData();
   }
 
-  /// Fetches user data and stores it in a `Completer` for reusability.
-  void _refreshUserData() {
-    _userDataCompleter = Completer<DocumentSnapshot>();
-    _controller.loadUserData().then((data) {
-      if (!_userDataCompleter.isCompleted) {
-        _userDataCompleter.complete(data);
-      }
-    });
+  /// (Re)fetch current user-document from Firestore.
+  void _reloadUserData() {
+    _userDocFuture = _controller.loadUserData();
   }
 
   @override
   Widget build(BuildContext context) {
     return EditProfileView(
-      userDataFuture: _userDataCompleter.future,
+      userDataFuture: _userDocFuture,
+
+      /// When the avatar is changed:
       onProfilePhotoUpdate: () async {
         await _controller.uploadProfilePhoto(context);
-        _refreshUserData(); // Refresh user data after updating profile photo
-        setState(() {}); // Trigger UI rebuild
+        setState(_reloadUserData);               // refresh + rebuild
       },
+
+      /// When any text field is edited:
       onFieldUpdated: () {
-        _refreshUserData(); // Refresh user data when a field is updated
-        setState(() {}); // Trigger UI rebuild
+        setState(_reloadUserData);               // refresh + rebuild
       },
     );
   }

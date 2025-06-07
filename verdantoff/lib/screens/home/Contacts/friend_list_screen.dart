@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'friends_tab.dart';
 import 'Group_chat_tab/groups_tab.dart';
-import 'chats_tab.dart';
 
 class FriendListScreen extends StatefulWidget {
   @override
@@ -15,7 +14,7 @@ class _FriendListScreenState extends State<FriendListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -37,7 +36,6 @@ class _FriendListScreenState extends State<FriendListScreen>
             tabs: const [
               Tab(text: 'Friends'),
               Tab(text: 'Groups'),
-              Tab(text: 'Tags'),
             ],
           ),
           Expanded(
@@ -46,7 +44,6 @@ class _FriendListScreenState extends State<FriendListScreen>
               children: [
                 FriendsTab(),
                 GroupsTab(),
-                ChatsTab(),
               ],
             ),
           ),

@@ -20,13 +20,14 @@ class P2PChat {
 
   /// Stores a summary of the last message exchanged in the chat.
   /// This can be used for quick previews in the chat list.
+  /// Now includes support for file preview metadata.
   final Map<String, dynamic> lastMessage;
 
   /// A map storing the unread message count for each participant.
   /// The keys are user IDs, and the values are the number of unread messages.
   final Map<String, int> unreadCounts;
 
-  /// Optional alias for the chat participant (e.g., a friend’s custom name).
+  /// Optional alias for the chat participant (e.g., a friend's custom name).
   /// This field is not stored in Firestore but can be dynamically set.
   final String? alias;
 
@@ -39,7 +40,7 @@ class P2PChat {
     required this.updatedAt,
     required this.lastMessage,
     required this.unreadCounts,
-    this.alias, // Alias is optional and dynamically fetched
+    this.alias,
   });
 
   /// Factory constructor to create a `P2PChat` instance from Firestore data.
@@ -48,19 +49,20 @@ class P2PChat {
   /// - [data]: A map containing chat details retrieved from Firestore.
   ///
   /// Converts Firestore timestamps to `DateTime` objects and initializes the chat model.
+  /// Now properly handles file preview data in lastMessage.
   factory P2PChat.fromMap(String id, Map<String, dynamic> data) {
     return P2PChat(
       id: id,
-      type: data['type'] ?? 'direct', // Defaults to 'direct' if not specified
-      participants: List<String>.from(data['participants'] ?? []), // Ensures a valid list
+      type: data['type'] ?? 'direct',
+      participants: List<String>.from(data['participants'] ?? []),
       createdAt: (data['createdAt'] != null)
           ? (data['createdAt'] as Timestamp).toDate()
-          : DateTime.now(), // Defaults to the current timestamp if null
+          : DateTime.now(),
       updatedAt: (data['updatedAt'] != null)
           ? (data['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(), // Defaults to the current timestamp if null
-      lastMessage: Map<String, dynamic>.from(data['lastMessage'] ?? {}), // Stores last message details
-      unreadCounts: Map<String, int>.from(data['unreadCounts'] ?? {}), // Maps unread message counts
+          : DateTime.now(),
+      lastMessage: Map<String, dynamic>.from(data['lastMessage'] ?? {}),
+      unreadCounts: Map<String, int>.from(data['unreadCounts'] ?? {}),
     );
   }
 
@@ -90,9 +92,9 @@ class P2PChat {
       participants: participants,
       createdAt: createdAt,
       updatedAt: updatedAt,
-      lastMessage: lastMessage ?? this.lastMessage, // Only update if provided
+      lastMessage: lastMessage ?? this.lastMessage,
       unreadCounts: unreadCounts,
-      alias: alias ?? this.alias, // Keep the existing alias if not updated
+      alias: alias ?? this.alias,
     );
   }
 }

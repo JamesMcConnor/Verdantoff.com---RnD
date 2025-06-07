@@ -86,32 +86,60 @@ class ChatListScreenService {
         .orderBy('updatedAt', descending: true)
         .snapshots()
         .listen((querySnapshot) async {
-      _latestGroupChats = await Future.wait(querySnapshot.docs.map((doc) async {
-        final data = doc.data();
-        final lastMsg = data['lastMessage'] ?? {};
-        final groupName = data['name'] ?? 'Unnamed Group';
-        final unread = await _getUnreadCount(doc.id, userId);
+      final List<GroupChatDisplayModel> filteredGroups = [];
 
-        return GroupChatDisplayModel(
-          groupId: doc.id,
-          groupName: groupName,
-          lastMessageContent: lastMsg['isRecalled'] == true ? 'Message recalled' : lastMsg['content'] ?? '',
-          lastMessageSenderName: lastMsg['senderName'] ?? '',
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          unreadCount: unread,
-          isLastMessageRecalled: lastMsg['isRecalled'] == true,
-        );
+      for (var doc in querySnapshot.docs) {
+        try {
+          final data = doc.data();
+          final roles = data['roles'] as Map<String, dynamic>? ?? {};
+          if (!roles.containsKey(userId)) continue;
 
-      }).toList());
+          final lastMsg = data['lastMessage'] ?? {};
+          final groupName = data['name'] ?? 'Unnamed Group';
+          final unread = await _getUnreadCount(doc.id, userId);
 
+          filteredGroups.add(GroupChatDisplayModel(
+            groupId: doc.id,
+            groupName: groupName,
+            lastMessageContent: lastMsg['isRecalled'] == true
+                ? 'Message recalled'
+                : lastMsg['content'] ?? '',
+            lastMessageSenderName: lastMsg['senderName'] ?? '',
+            updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            unreadCount: unread,
+            isLastMessageRecalled: lastMsg['isRecalled'] == true,
+          ));
+        } catch (e) {
+          print('[ERROR] listenForGroupChats parsing: $e');
+          // 跳过异常的 group
+        }
+      }
+
+      _latestGroupChats = filteredGroups;
       _updateGroupChatList();
     });
   }
 
+
   Future<int> _getUnreadCount(String groupId, String userId) async {
-    final doc = await _firestore.collection('groups').doc(groupId).collection('members').doc(userId).get();
-    return doc['unreadCount'] ?? 0;
+    try {
+      final doc = await _firestore
+          .collection('groups')
+          .doc(groupId)
+          .collection('members')
+          .doc(userId)
+          .get();
+
+      if (!doc.exists) {
+        return 0;
+      }
+      return doc.data()?['unreadCount'] ?? 0;
+    } catch (e) {
+      print('[ERROR] _getUnreadCount failed: $e');
+      return 0;
+    }
   }
+
 
   void _updateGroupChatList() {
     if (!_groupChatsController.isClosed) {

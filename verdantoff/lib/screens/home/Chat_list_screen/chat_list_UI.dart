@@ -18,8 +18,9 @@ class ChatListUI extends StatelessWidget {
         return StreamBuilder<List<GroupChatDisplayModel>>(
           stream: controller.groupChatsStream,
           builder: (context, groupSnapshot) {
-            if (p2pSnapshot.connectionState == ConnectionState.waiting ||
-                groupSnapshot.connectionState == ConnectionState.waiting) {
+            final bool p2pLoading = !p2pSnapshot.hasData;
+            final bool groupLoading = !groupSnapshot.hasData;
+            if (p2pLoading || groupLoading) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -55,10 +56,8 @@ class ChatListUI extends StatelessWidget {
                 bTime = DateTime.fromMillisecondsSinceEpoch(0);
               }
 
-              return bTime.compareTo(aTime); // 按时间降序
+              return bTime.compareTo(aTime);
             });
-
-
 
             if (combinedList.isEmpty) {
               return const Center(child: Text("No chats available"));
